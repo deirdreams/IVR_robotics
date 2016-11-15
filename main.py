@@ -7,10 +7,10 @@ import ev3dev.ev3 as ev3
 import tutorial as tutorial
 import utilities
 import openLoopControl as olc
+import helper as helper
 
 print ('Welcome to ev3')
 
-ev3.Sound.speak('Welcome to e v 3').wait()
 
 # Step A: Basic open driving
 #tutorial.operateWheelsBasic()
