@@ -10,7 +10,28 @@ class PidController:
 		self.KP = (0, 0.5)[p]
 		self.KI = (0, 0.5)[i]
 		self.KD = (0, 0.5)[d]
+		self.pEnabled = p
+		self.iEnabled = i
+		self.dEnabled = d
 		self.errorSum = [0]
+
+	def setKP(self, kp):
+		if self.pEnabled:
+			self.KP = kp
+		else:
+			raise RuntimeError('p not enable thus kp can\'t be changed.')
+
+	def setKI(self, ki):
+		if self.iEnabled:
+			self.KI = ki
+		else:
+			raise RuntimeError('i not enable thus ki can\'t be changed.')
+
+	def setKD(self, kd):
+		if self.dEnabled:
+			self.KD = kd
+		else:
+			raise RuntimeError('d not enable thus kd can\'t be changed.')
 
 	def __getError(self):
 		error = self.sp - self.pv
