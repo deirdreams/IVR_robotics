@@ -1,11 +1,15 @@
 class PidController:
 
-	def __init__(self, sp):
+	def __init__(self, sp, p, i, d):
+		
+		# initialize with sp as desired value
+		# p, i, d as (P)(I)(D)-Controller
+
 		self.sp = sp
 		self.pv = 0
-		self.KP = 0.5
-		self.KI = 0.5
-		self.KD = 0.5
+		self.KP = (0, 0.5)[p]
+		self.KI = (0, 0.5)[i]
+		self.KD = (0, 0.5)[d]
 		self.errorSum = [0]
 
 	def __getError(self):
