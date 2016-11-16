@@ -15,13 +15,13 @@ def detectLoop(direction):
         leftMotor.reset()
         rightMotor.reset()
         if direction:
-                leftMotor.run_direct(duty_cycle_sp = 10)
+                leftMotor.run_direct(duty_cycle_sp = 20)
                 rightMotor.run_direct(duty_cycle_sp = 30)
         else:
                 leftMotor.run_direct(duty_cycle_sp = 30)
-                rightMotor.run_direct(duty_cycle_sp = 10)
+                rightMotor.run_direct(duty_cycle_sp = 20)
 
-def main(i):
+def follow_line(i):
         i = i
         while (color.value() > 60):
                 detectLoop(i)
@@ -32,7 +32,5 @@ def main(i):
                 detectLoop(i)
                 print color.value()
         i = not i
-        main(i)
-
-main(0)
+        follow_line(i)
 
