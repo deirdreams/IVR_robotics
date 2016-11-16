@@ -10,14 +10,15 @@ class Pablo:
 		self.color = ev3.ColorSensor(ev3.INPUT_2)
 		self.sonar = ev3.UltrasonicSensor(ev3.INPUT_1)
 		self.gyro = ev3.UltrasonicSensor(ev3.INPUT_4)
+		self.direction = 0
 
-	def __detectLoop(self, direction):
+	def __detectLoop(self):
 		#0 for left turn, 1 for right turn
 		self.__resetMotors()
 		if self.color.value() > 60:
-			direction = direction
+			self.direction = self.direction
 		else:
-			direction = not direction
+			sefl.direction = not self.direction
 		if direction:
 				self.leftMotor.run_direct(duty_cycle_sp = 10)
 				self.rightMotor.run_direct(duty_cycle_sp = 30)
@@ -92,10 +93,11 @@ class Pablo:
 		return detected
 
 	def run(self):
-		detected = 0
+		detected = False
 		while(not detected):
-			self.__detectLoop(0)
-			detected = __findObject()
+			self.__detectLoop(self.direction)
+			print self.sonar.value()
+			detected = self.__objectDetected()
 
 
 
