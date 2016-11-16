@@ -6,6 +6,7 @@ class Pablo:
 	def __init__(self):
 		self.leftMotor = ev3.LargeMotor('outC')
 		self.rightMotor = ev3.LargeMotor('outD')
+		self.head = ev3.MediumMotor('outB')
 		self.color = ev3.ColorSensor(ev3.INPUT_2)
 		self.sonar = ev3.UltrasonicSensor(ev3.INPUT_1)
 		self.gyro = ev3.UltrasonicSensor(ev3.INPUT_4)
@@ -15,15 +16,15 @@ class Pablo:
 		self.__resetMotors()
 
 		if direction:
-				self.leftMotor.run_direct(duty_cycle_sp = 20)
+				self.leftMotor.run_direct(duty_cycle_sp = 10)
 				self.rightMotor.run_direct(duty_cycle_sp = 30)
 		else:
 				self.leftMotor.run_direct(duty_cycle_sp = 30)
-				self.rightMotor.run_direct(duty_cycle_sp = 20)
+				self.rightMotor.run_direct(duty_cycle_sp = 10)
 
 		return self
 
-	def __follow_line(self):
+	def __follow_line(self, i):
 		i = i
 		while (color.value() > 60):
 				self.__detectLoop(i)
@@ -33,7 +34,7 @@ class Pablo:
 				self.__detectLoop(i)
 				print color.value()
 		i = not i
-		self.follow_line(i)
+		self.__follow_line(i)
 
 	def __resetMotors(self):
 		self.rightMotor.reset()
@@ -62,11 +63,37 @@ class Pablo:
 			raise RuntimeError('Unknown direction')
 
 	
+	def __objectDetected(self):
+		val = self.sonar.value()
+		#value in mm
+		if val < 170:
+			return True
+		else:
+			return False
 
+	def __findObject(self):
+		detected = 0
+		self.head.run_to_abs_pos(duty_cycle_sp=30, position_sp=-90)
+
+		if self.__objectDetected():
+			detected = 1
+
+		sleep(1)
+
+		self.head.run_to_abs_pos(duty_cycle_sp=30, position_sp=90)
+
+		if self.__objectDetected():
+			detected = 1
+
+		sleep(1)
+		return detected
 
 	def run(self):
-		while(True):
-			self.__follow_line()
+		detected = 0
+		while(!detected):
+			self.__follow_line(0)
+			detected = __findObject()
+
 
 
 
