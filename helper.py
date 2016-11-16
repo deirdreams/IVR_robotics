@@ -38,19 +38,27 @@ def checkSurroundings():
 			turnRight90Degrees()
 			moveForwardTimed()
 		else:
-			moveForward()
+			moveForwardTimed()
 
 def turnLeft90Degrees():
-	rest()
-	target = gyro.value + 90
-	while (gyro.value < target):
-			rightMotor.run_direct(duty_cycle_sp = 50)
-	reset()
+	initial = gyro.value()
+	resetWheels()
+	target = initial + 85
+	# turning left - gyro value decreasing
+	while True:
+		if (gyro.value() > target):
+			rightMotor.run_direct(duty_cycle_sp = 20)
+		else:
+			resetWheels()
 
 def turnRight90Degrees():
-	reset()
-	target = gyro.value + 90
-	while (gyro.value < target):
-			leftMotor.run_direct(duty_cycle_sp = 50)
-	reset()
+	initial = gyro.value()
+	resetWheels()
+	target = initial - 85
+	# turning right - gyro value increasing
+	while True:
+		if (gyro.value() < target):
+			leftMotor.run_direct(duty_cycle_sp = 20)
+		else:
+			resetWheels()
 
