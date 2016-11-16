@@ -14,7 +14,10 @@ class Pablo:
 	def __detectLoop(self, direction):
 		#0 for left turn, 1 for right turn
 		self.__resetMotors()
-
+		if self.color.value() > 60:
+			direction = direction
+		else:
+			direction = not direction
 		if direction:
 				self.leftMotor.run_direct(duty_cycle_sp = 10)
 				self.rightMotor.run_direct(duty_cycle_sp = 30)
@@ -28,11 +31,11 @@ class Pablo:
 		i = i
 		while (color.value() > 60):
 				self.__detectLoop(i)
-				print color.value()
+				print self.color.value()
 		#ev3.Sound.speak('Line found').wait()
 		while (color.value() < 60):
 				self.__detectLoop(i)
-				print color.value()
+				print self.color.value()
 		i = not i
 		self.__follow_line(i)
 
@@ -90,8 +93,8 @@ class Pablo:
 
 	def run(self):
 		detected = 0
-		while(!detected):
-			self.__follow_line(0)
+		while(not detected):
+			self.__detectLoop(0)
 			detected = __findObject()
 
 
