@@ -12,61 +12,61 @@ class Pablo:
 
 	def __detectLoop(self, direction):
 		#0 for left turn, 1 for right turn
-        self.__resetMotors()
+		self.__resetMotors()
 
-        if direction:
-                self.leftMotor.run_direct(duty_cycle_sp = 20)
-                self.rightMotor.run_direct(duty_cycle_sp = 30)
-        else:
-                self.leftMotor.run_direct(duty_cycle_sp = 30)
-                self.rightMotor.run_direct(duty_cycle_sp = 20)
+		if direction:
+				self.leftMotor.run_direct(duty_cycle_sp = 20)
+				self.rightMotor.run_direct(duty_cycle_sp = 30)
+		else:
+				self.leftMotor.run_direct(duty_cycle_sp = 30)
+				self.rightMotor.run_direct(duty_cycle_sp = 20)
 
-        return self
+		return self
 
-    def __follow_line(self):
-    	i = i
-        while (color.value() > 60):
-                self.__detectLoop(i)
-                print color.value()
-        #ev3.Sound.speak('Line found').wait()
-        while (color.value() < 60):
-                self.__detectLoop(i)
-                print color.value()
-        i = not i
-        self.follow_line(i)
+	def __follow_line(self):
+		i = i
+		while (color.value() > 60):
+				self.__detectLoop(i)
+				print color.value()
+		#ev3.Sound.speak('Line found').wait()
+		while (color.value() < 60):
+				self.__detectLoop(i)
+				print color.value()
+		i = not i
+		self.follow_line(i)
 
-    def __resetMotors(self):
-    	self.rightMotor.reset()
-    	self.leftMotor.reset()
-    	return self
+	def __resetMotors(self):
+		self.rightMotor.reset()
+		self.leftMotor.reset()
+		return self
 
-   	def __runMotor(self, motor):
-   		motor.run_direct(duty_cycle_sp=30)
-   		return self
+	def __runMotor(self, motor):
+		motor.run_direct(duty_cycle_sp=30)
+		return self
 
-    def __turn90(self, direction):
+	def __turn90(self, direction):
 
-    	self.__resetMotors()
+		self.__resetMotors()
 
-    	if direction == 'r':
-    		self.__runMotor(self.leftMotor)
-    		sleep(2.2)
-    		self.__resetMotors()
+		if direction == 'r':
+			self.__runMotor(self.leftMotor)
+			sleep(2.2)
+			self.__resetMotors()
 
-    	elif direction == 'l':
-    		self.__runMotor(self.leftMotor)
-    		sleep(2.2)
-    		self.__resetMotors()
+		elif direction == 'l':
+			self.__runMotor(self.leftMotor)
+			sleep(2.2)
+			self.__resetMotors()
 
-    	else:
-    		raise RuntimeError('Unknown direction')
+		else:
+			raise RuntimeError('Unknown direction')
 
-   	
+	
 
 
-   	def run(self):
-   		while(True):
-   			self.__follow_line()
+	def run(self):
+		while(True):
+			self.__follow_line()
 
 
 
