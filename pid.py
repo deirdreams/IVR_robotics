@@ -50,4 +50,13 @@ class PidController:
 		self.pv = pv
 		ret = self.__getP() + self.__getI() + self.__getD()
 		self.errorSum.append(self.__getError())
-		return 100*ret/self.sp
+		if(100*ret/self.sp) > 99:
+			return 100
+		elif(100*ret/self.sp) < -99:
+			return -100
+		elif(100*ret/self.sp) < 20 and (100*ret/self.sp) > 0:
+			return 30
+		elif(100*ret/self.sp) > -20 and (100*ret/self.sp) < 0:
+			return -30
+		else:
+			return 100*ret/self.sp
