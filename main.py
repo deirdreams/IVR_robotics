@@ -13,38 +13,13 @@ class Pablo:
                 self.gyro = ev3.UltrasonicSensor(ev3.INPUT_4)
                 self.stop = 0
 
-        def __detectLoop(self, direction):
-                #0 for left turn, 1 for right turn
-                #self.__resetMotors()
-                #if self.color.value() > 60:
-                #       direction = direction
-                #else:
-                #       direction = not direction
-                if(self.__objectDetected()):
-                        self.stop = 1
-                if direction:
-                                self.leftMotor.run_direct(duty_cycle_sp = 15)
-                                self.rightMotor.run_direct(duty_cycle_sp = 45)
-                else:
-                                self.leftMotor.run_direct(duty_cycle_sp = 45)
-                                self.rightMotor.run_direct(duty_cycle_sp = 15)
+        def __follow_line(self):
+			while(not self.__objectDetected()):
+				a = PidController(10, 1, 0, 0)
+				val = a.getPower(self.color.value())/2
+	        	self.leftMotor.run_direct(duty_cycle_sp=(50-val)/2)
+	        	self.rightMotor.run_direct(duty_cycle_sp=(50+val)/2)
 
-                return self
-
-        def __follow_line(self, i):
-                i = i
-                while (self.color.value() > 60 and not self.stop):
-                                self.__detectLoop(i)
-                #ev3.Sound.speak('Line found').wait()
-                while (self.color.value() < 60 and not self.stop):
-                                self.__detectLoop(i)
-
-                i = not i
-                #print self.__objectDetected()
-                if(self.stop):
-                        print 'hi'
-                        return
-                self.__follow_line(i)
 
         def __resetMotors(self):
 				self.rightMotor.reset()
@@ -116,7 +91,7 @@ class Pablo:
         def run(self):
                 detected = 0
                 #while(not detected):
-                self.__follow_line(0)
+                self.__follow_line()
                 #       detected = self.__findObject()
                 self.__resetMotors()
                 val = self.sonar.value()
@@ -124,4 +99,4 @@ class Pablo:
                 self.__turnHead90('l')
                 #self.__findObject()
                 self.__avoidObject(val)
-                self.follow_line(0)
+                #self.follow_line()
