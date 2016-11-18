@@ -13,9 +13,18 @@ class Pablo:
 			self.gyro = ev3.UltrasonicSensor(ev3.INPUT_4)
 			self.touch = ev3.TouchSensor(ev3.INPUT_3)
 			self.stop = 0
+			self.positions = [0 for i in range(100)]
+
+		def __isOnLine(self):
+			self.positions.append(self.color.value())
+			print self.color.value()
+			self.positions.pop(0)
+			whites = [i for i in self.positions if i > 60]
+			return len(whites) == 0
+
 
 		def __follow_line(self):
-			while(not self.__objectDetected() and self.touch.value() != 1):
+			while(not self.__objectDetected() and self.touch.value() != 1 and self.__isOnLine()):
 				a = PidController(30, 1, 0, 0)
 				val = a.getPower(self.color.value())/2
 				#print val
@@ -32,37 +41,28 @@ class Pablo:
 			motor.run_direct(duty_cycle_sp=sp)
 			return self
 
-		def __say(self, preach):
-			if(type(preach) == str):
-				ev3.Sound.speak(preach).wait()
-			else:
-				raise RuntimeError('Can\'t preach non string wisdom')
-
 		def __turn90(self, direction):
-
 			self.__resetMotors()
-
 			if direction == 'r':
-				self.__runMotor(self.leftMotor, 30)
-				sleep(2.4)
-				self.__resetMotors()
-
+					self.__runMotor(self.leftMotor, 30)
+					sleep(2.4)
+					self.__resetMotors()
 			elif direction == 'l':
-				self.__runMotor(self.rightMotor, 30)
-				sleep(2.4)
-				self.__resetMotors()
+					self.__runMotor(self.rightMotor, 30)
+					sleep(2.4)
+					self.__resetMotors()
 
 			else:
-				raise RuntimeError('Unknown direction')
+					raise RuntimeError('Unknown direction')
 
 
 		def __objectDetected(self):
 			val = self.sonar.value()
 			#value in mm
 			if val < 100:
-				return True
+					return True
 			else:
-				return False
+					return False
 
 		def __findObject(self):
 			detected = 0
@@ -83,9 +83,9 @@ class Pablo:
 
 		def __turnHead90(self, direction):
 			if direction == 'r':
-				self.head.run_to_abs_pos(duty_cycle_sp=-50, position_sp=90)
+				self.head.run_to_abs_pos(duty_cycle_sp=-50, position_sp=180)
 			elif direction == 'l':
-				self.head.run_to_abs_pos(duty_cycle_sp=50, position_sp=-90)
+				self.head.run_to_abs_pos(duty_cycle_sp=50, position_sp=0)
 			else:
 					raise RuntimeError('Unknown direction')
 
@@ -95,19 +95,21 @@ class Pablo:
 			i = 0
 			while (self.touch.value() != 1):
 				self.__runMotor(self.rightMotor, 20)
-			i += 1
-			if(i > 300 and self.color.value() < 50):
-				return
+				i += 1
+				if(i > 300 and self.color.value() < 50):
+				   return
 			#print -pid.getPower(self.sonar.value())
-			self.__runMotor(self.leftMotor, -pid.getPower(self.sonar.value())/2)
+				self.__runMotor(self.leftMotor, -pid.getPower(self.sonar.value())/2)
+
+		#def __followBroken(self):
+
 
 		def run(self):
 			detected = 0
-			#while(not detected):
-			while (self.touch.value() != 1):
-				self.__say('They see me rollin')
+		#while self.__isOnLine():
+				#while(not detected):
+			while (self.touch.value() != 1 or self.__isOnLine()):
 				self.__follow_line()
-				self.__say('Roadblock')
 				#       detected = self.__findObject()
 				self.__resetMotors()
 				val = self.sonar.value()
@@ -119,3 +121,7 @@ class Pablo:
 				self.__avoidObject(val)
 				self.__follow_line()
 				#self.follow_line()
+
+		def runBroken(self):
+			while (self.__isOnLine()):
+				self.__follow_line()
