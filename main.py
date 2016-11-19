@@ -13,20 +13,28 @@ class Pablo:
 			self.gyro = ev3.GyroSensor(ev3.INPUT_4)
 			self.touch = ev3.TouchSensor(ev3.INPUT_3)
 			self.stop = 0
-			self.positions = [0 for i in range(100)]
-            self.gyroOnInit = self.gyro.value()
+			self.positions = [0 for i in range(25)]
+	                self.gyroOnInit = self.gyro.value()
+
+		def __say(self, sentence):
+			self.__resetMotors()
+			if type(sentence) is str:
+				ev3.Sound.seak(sentence)
+			else:
+				raise ValueError('Input is not a string')
 
 		def __isOnLine(self):
 			self.positions.append(self.color.value())
 			print self.color.value()
 			self.positions.pop(0)
 			whites = [i for i in self.positions if i > 60]
-			return len(whites) == 0
+			return not len(whites) == 23
 
 
 		def __follow_line(self):
+			self.positions = [0 for i in range(25)]
 			while(not self.__objectDetected() and self.touch.value() != 1 and self.__isOnLine()):
-				a = PidController(30, 1, 0, 0)
+				a = PidController(30, 1, 1, 0)
 				val = a.getPower(self.color.value())/2
 				#print val
 				self.leftMotor.run_direct(duty_cycle_sp=(50-val)/2)
@@ -37,30 +45,54 @@ class Pablo:
 			self.rightMotor.reset()
 			self.leftMotor.reset()
 			return self
+		
+		def __say(self, sentence):
+                        self.__resetMotors()
+                        if type(sentence) is str:
+                                ev3.Sound.speak(sentence).wait()
+                        else:
+                                raise ValueError('Input is not a string')
 
 		def __runMotor(self, motor, sp):
 			motor.run_direct(duty_cycle_sp=sp)
 			return self
 
-        #temporarily public
-        def turn90Gyro(self, direction):
-            if direction == 'r':
-                while (self.gyro.value() < (self.gyroOnInit + 90)):
-                    print self.gyro.value()
-                    self.__runMotor(self.leftMotor, 30)
-            elif direction == 'l':
-                while (self.gyro.value() > (self.gyroOnInit - 90)):
-                    self.__runMotor(self.rightMotor, 30)
+	     
+        	def __turn90Gyro(self, direction, spin):
+			self.__resetMotors()
+			#0 for right 1 for left
+            		if direction == 0:
+               			 while (self.gyro.value() < (self.gyroOnInit + 90)):
+					print self.gyro.value()
+                    			self.__runMotor(self.leftMotor, 20)
+            		elif direction == 1:
+                		while (self.gyro.value() > (self.gyroOnInit - 90)):
+                    			self.__runMotor(self.rightMotor, 20)
+
+			elif direction == 's':
+				while (abs(self.gyro.value() - self.gyroOnInit) > 10) :
+					if spin:
+						print abs(self.gyro.value() - self.gyroOnInit)
+						self.__runMotor(self.rightMotor, 30)
+					else:
+						print abs(self.gyro.value() - self.gyroOnInit)
+                                                self.__runMotor(self.leftMotor, 30)
+
+			
+			else:
+				raise RuntimeError('Unkown direction')
+			self.__resetMotors()
 
 		def __turn90(self, direction):
 			self.__resetMotors()
+			#0 for right 1 for left
 			if direction == 'r':
 					self.__runMotor(self.leftMotor, 30)
-					sleep(2.4)
+					sleep(2.3)
 					self.__resetMotors()
 			elif direction == 'l':
 					self.__runMotor(self.rightMotor, 30)
-					sleep(2.4)
+					sleep(2.3)
 					self.__resetMotors()
 
 			else:
@@ -94,11 +126,19 @@ class Pablo:
 
 		def __turnHead90(self, direction):
 			if direction == 'r':
-				self.head.run_to_abs_pos(duty_cycle_sp=-50, position_sp=180)
+				self.head.run_to_abs_pos(duty_cycle_sp=-50, position_sp=95)
 			elif direction == 'l':
+				self.head.run_to_abs_pos(duty_cycle_sp=50, position_sp=-95)
+			elif direction == 's':
 				self.head.run_to_abs_pos(duty_cycle_sp=50, position_sp=0)
 			else:
-					raise RuntimeError('Unknown direction')
+				raise RuntimeError('Unknown direction')
+	
+
+		def __driveStraight(self):
+			self.leftMotor.run_direct(duty_cycle_sp=40)
+			self.rightMotor.run_direct(duty_cycle_sp=40)			
+
 
 		def __avoidObject(self, snapshot):
 			self.__resetMotors()
@@ -111,8 +151,6 @@ class Pablo:
 				   return
 			#print -pid.getPower(self.sonar.value())
 				self.__runMotor(self.leftMotor, -pid.getPower(self.sonar.value())/2)
-
-		#def __followBroken(self):
 
 
 		def run(self):
@@ -129,10 +167,37 @@ class Pablo:
 				self.__turnHead90('r')
 				sleep(1)
 				#self.__findObject()
+				self.__say('Avoiding object')
 				self.__avoidObject(val)
 				self.__follow_line()
+				self.__turnHead90('s')
 				#self.follow_line()
 
-		def runBroken(self):
-			while (self.__isOnLine()):
+		
+		def runBroken(self, d, s):
+			while (self.touch.value() != 1):
 				self.__follow_line()
+				self.__resetMotors()
+				self.__say('End of line. Finding new line.')
+				sleep(1)
+				self.__resetMotors()
+				self.__turn90Gyro(d, 0)
+				self.__resetMotors()
+				sleep(1)
+				while(not self.color.value() < 40):
+					self.__driveStraight()
+				self.__resetMotors()
+				self.__say('Line found.')
+				sleep(1)
+				self.__turn90Gyro('s', s)
+				sleep(1)
+				self.__resetMotors()
+				sleep(1)
+				self.runBroken(not d, not s)
+				sleep(2)
+				self.runBroken(not d, not s)
+
+		def runStraight(self):
+			self.__say('Following line.')
+			self.__follow_line()
+			self.__say('End of line. Nowhere to go.')
