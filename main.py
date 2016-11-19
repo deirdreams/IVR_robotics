@@ -13,15 +13,15 @@ class Pablo:
 			self.gyro = ev3.GyroSensor(ev3.INPUT_4)
 			self.touch = ev3.TouchSensor(ev3.INPUT_3)
 			self.stop = 0
-			self.positions = [0 for i in range(20)]
-	                self.gyroOnInit = self.gyro.value()
+			self.positions = [0 for i in range(100)]
+            self.gyroOnInit = self.gyro.value()
 
 		def __isOnLine(self):
 			self.positions.append(self.color.value())
 			print self.color.value()
 			self.positions.pop(0)
 			whites = [i for i in self.positions if i > 60]
-			return not len(whites) == 20
+			return len(whites) == 0
 
 
 		def __follow_line(self):
@@ -42,40 +42,23 @@ class Pablo:
 			motor.run_direct(duty_cycle_sp=sp)
 			return self
 
-	     
-        	def __turn90Gyro(self, direction, spin):
-			self.__resetMotors()
-			#0 for right 1 for left
-            		if direction == 0:
-               			 while (self.gyro.value() < (self.gyroOnInit + 90)):
-					print self.gyro.value()
-                    			self.__runMotor(self.leftMotor, 30)
-            		elif direction == 1:
-                		while (self.gyro.value() > (self.gyroOnInit - 90)):
-                    			self.__runMotor(self.rightMotor, 30)
-
-			elif direction == 's':
-				while (abs(self.gyro.value() - self.gyroOnInit) > 10) :
-					if spin:
-						print abs(self.gyro.value() - self.gyroOnInit)
-						self.__runMotor(self.rightMotor, 30)
-					else:
-						print abs(self.gyro.value() - self.gyroOnInit)
-                                                self.__runMotor(self.leftMotor, 30)
-
-			
-			else:
-				raise RuntimeError('Unkown direction')
-			self.__resetMotors()
+        #temporarily public
+        def turn90Gyro(self, direction):
+            if direction == 'r':
+                while (self.gyro.value() < (self.gyroOnInit + 90)):
+                    print self.gyro.value()
+                    self.__runMotor(self.leftMotor, 30)
+            elif direction == 'l':
+                while (self.gyro.value() > (self.gyroOnInit - 90)):
+                    self.__runMotor(self.rightMotor, 30)
 
 		def __turn90(self, direction):
 			self.__resetMotors()
-			#0 for right 1 for left
-			if direction == 0:
+			if direction == 'r':
 					self.__runMotor(self.leftMotor, 30)
 					sleep(2.4)
 					self.__resetMotors()
-			elif direction == 1:
+			elif direction == 'l':
 					self.__runMotor(self.rightMotor, 30)
 					sleep(2.4)
 					self.__resetMotors()
@@ -115,12 +98,7 @@ class Pablo:
 			elif direction == 'l':
 				self.head.run_to_abs_pos(duty_cycle_sp=50, position_sp=0)
 			else:
-				raise RuntimeError('Unknown direction')
-
-		def __driveStraight(self):
-			self.leftMotor.run_direct(duty_cycle_sp=40)
-			self.rightMotor.run_direct(duty_cycle_sp=40)			
-
+					raise RuntimeError('Unknown direction')
 
 		def __avoidObject(self, snapshot):
 			self.__resetMotors()
@@ -155,25 +133,6 @@ class Pablo:
 				self.__follow_line()
 				#self.follow_line()
 
-		def runBroken(self, d, s):
-			while (self.touch.value() != 1):
-				print 'follow line'
+		def runBroken(self):
+			while (self.__isOnLine()):
 				self.__follow_line()
-				self.__resetMotors()
-				print 'turn'
-				sleep(2)
-				self.__resetMotors()
-				self.__turn90Gyro(d, 0)
-				self.__resetMotors()
-				sleep(2)
-				while(not self.color.value() < 40):
-					print 'drive'
-					self.__driveStraight()
-				self.__resetMotors()
-				print 'turn'
-				sleep(2)
-				self.__turn90Gyro('s', s)
-				sleep(2)
-				self.__resetMotors()
-				sleep(2)
-				self.runBroken(not d, not s)
