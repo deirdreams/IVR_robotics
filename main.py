@@ -46,7 +46,7 @@ class Pablo:
 			self.rightMotor.reset()
 			self.leftMotor.reset()
 			return self
-		
+
 		def __say(self, sentence):
                         self.__resetMotors()
                         if type(sentence) is str:
@@ -58,7 +58,7 @@ class Pablo:
 			motor.run_direct(duty_cycle_sp=sp)
 			return self
 
-	     
+
         	def __turn90Gyro(self, direction, spin):
 			self.__resetMotors()
 			#0 for right 1 for left
@@ -83,7 +83,7 @@ class Pablo:
                                                 self.__runMotor(self.leftMotor, 30)
 						self.__runMotor(self.rightMotor, -30)
 
-			
+
 			else:
 				raise RuntimeError('Unkown direction')
 			self.__resetMotors()
@@ -142,11 +142,11 @@ class Pablo:
 				self.head.run_to_abs_pos(duty_cycle_sp=50, position_sp=0)
 			else:
 				raise RuntimeError('Unknown direction')
-	
+
 
 		def __driveStraight(self):
 			self.leftMotor.run_direct(duty_cycle_sp=40)
-			self.rightMotor.run_direct(duty_cycle_sp=40)			
+			self.rightMotor.run_direct(duty_cycle_sp=40)
 
 
 		def __avoidObject(self, snapshot):
@@ -185,7 +185,7 @@ class Pablo:
 				#self.__turnHead90('s')
 				#self.follow_line()
 
-		
+
 		def runBroken(self, d, s):
 			while (self.touch.value() != 1):
 				self.__follow_line(23)
@@ -199,7 +199,7 @@ class Pablo:
 				while(not self.color.value() < 40):
 					self.__driveStraight()
 				ev3.Sound.speak('Line Found.')
-				sleep(0.3)
+				sleep(0.2)
 				self.__resetMotors()
 				#self.__say('Line found.')
 				sleep(1)
