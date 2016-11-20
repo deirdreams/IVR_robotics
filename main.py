@@ -199,7 +199,10 @@ class Pablo:
 				while(not self.color.value() < 40):
 					self.__driveStraight()
 				ev3.Sound.speak('Line Found.')
-				sleep(0.2)
+				if d == 0:
+					sleep(0.3)
+				else:
+					sleep(0.5)
 				self.__resetMotors()
 				#self.__say('Line found.')
 				sleep(1)
