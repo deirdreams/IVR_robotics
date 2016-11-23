@@ -46,7 +46,7 @@ class Pablo:
 			self.rightMotor.reset()
 			self.leftMotor.reset()
 			return self
-
+		
 		def __say(self, sentence):
                         self.__resetMotors()
                         if type(sentence) is str:
@@ -58,22 +58,26 @@ class Pablo:
 			motor.run_direct(duty_cycle_sp=sp)
 			return self
 
-
+	     
         	def __turn90Gyro(self, direction, spin):
 			self.__resetMotors()
 			#0 for right 1 for left
+			print self.gyro.value()
             		if direction == 0:
-               			 while (self.gyro.value() < (self.gyroOnInit + 88)):
+               			while (self.gyro.value() < (self.gyroOnInit + 88)):
                     			self.__runMotor(self.leftMotor, 20)
 					self.__runMotor(self.rightMotor, -20)
+				print self.gyro.value()
             		elif direction == 1:
                 		while (self.gyro.value() > (self.gyroOnInit - 88)):
                     			self.__runMotor(self.rightMotor, 20)
 					self.__runMotor(self.leftMotor, -20)
+				print self.gyro.value()
+
 
 
 			elif direction == 's':
-				while (abs(self.gyro.value() - self.gyroOnInit) > 10) :
+				while (abs(self.gyro.value() - self.gyroOnInit) % 360 > 10) :
 					if spin:
 						print abs(self.gyro.value() - self.gyroOnInit)
 						self.__runMotor(self.rightMotor, 30)
@@ -83,7 +87,7 @@ class Pablo:
                                                 self.__runMotor(self.leftMotor, 30)
 						self.__runMotor(self.rightMotor, -30)
 
-
+			
 			else:
 				raise RuntimeError('Unkown direction')
 			self.__resetMotors()
@@ -111,7 +115,7 @@ class Pablo:
 		def __objectDetected(self):
 			val = self.sonar.value()
 			#value in mm
-			if val < 100:
+			if val < 70:
 					return True
 			else:
 					return False
@@ -142,11 +146,11 @@ class Pablo:
 				self.head.run_to_abs_pos(duty_cycle_sp=50, position_sp=0)
 			else:
 				raise RuntimeError('Unknown direction')
-
+	
 
 		def __driveStraight(self):
 			self.leftMotor.run_direct(duty_cycle_sp=40)
-			self.rightMotor.run_direct(duty_cycle_sp=40)
+			self.rightMotor.run_direct(duty_cycle_sp=40)			
 
 
 		def __avoidObject(self, snapshot):
@@ -159,33 +163,29 @@ class Pablo:
 				i += 1
 				if(i > 300 and self.color.value() < 50):
 				   return
-			#print -pid.getPower(self.sonar.value())
 				self.__runMotor(self.leftMotor, -pid.getPower(self.sonar.value())/2)
 
 
 		def run(self):
 			detected = 0
-		#while self.__isOnLine():
-				#while(not detected):
 			while (self.touch.value() != 1):
 				self.__follow_line(100)
 				#print self.__isOnLine(1), self.positions
 				#       detected = self.__findObject()
 				self.__resetMotors()
 				val = self.sonar.value()
-				self.gyroOnInit = self.gyro.value()
+				self.gyroOnInit = self.gyro.value() + 10
 				self.__turn90Gyro(1, 0)
-				sleep(2)
+				sleep(1.25)
 				self.__turnHead90('r')
 				sleep(1)
-				#self.__findObject()
 				self.__say('Avoiding object')
 				self.__avoidObject(val)
+				#self.__say('Object avoided')
+				self.__turn90Gyro('s', 1)
 				self.__follow_line(100)
-				#self.__turnHead90('s')
-				#self.follow_line()
 
-
+		
 		def runBroken(self, d, s):
 			while (self.touch.value() != 1):
 				self.__follow_line(23)
@@ -203,9 +203,6 @@ class Pablo:
 					sleep(0.3)
 				else:
 					sleep(0.5)
-				self.__resetMotors()
-				#self.__say('Line found.')
-				sleep(1)
 				self.__turn90Gyro('s', s)
 				sleep(1)
 				self.__resetMotors()
